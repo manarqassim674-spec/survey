@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>استبيان العناية</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Tajawal', sans-serif;
+    background-color: #8db87a; /* pear green ~80% */
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 16px;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(6px);
+    border-radius: 20px;
+    padding: 36px 32px;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  }
+
+  .logo-area {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .logo-area h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: #1a3d1f;
+    letter-spacing: 1px;
+  }
+
+  .logo-area p {
+    color: #2d5a32;
+    font-size: 14px;
+    margin-top: 6px;
+  }
+
+  .divider {
+    height: 3px;
+    background: linear-gradient(to left, transparent, #2d6a35, transparent);
+    border-radius: 2px;
+    margin-bottom: 28px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  label {
+    display: block;
+    font-weight: 700;
+    font-size: 14px;
+    color: #1a3d1f;
+    margin-bottom: 7px;
+  }
+
+  label span.req { color: #8b0000; margin-right: 2px; }
+
+  input[type="text"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="date"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 2px solid #3a7a42;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.75);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 14px;
+    color: #1a3d1f;
+    outline: none;
+    transition: border-color 0.25s, box-shadow 0.25s;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: #1a5c25;
+    box-shadow: 0 0 0 3px rgba(45,106,53,0.2);
+    background: rgba(255,255,255,0.95);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 110px;
+  }
+
+  .char-count {
+    text-align: left;
+    font-size: 12px;
+    color: #2d5a32;
+    margin-top: 4px;
+  }
+
+  .char-count.warn { color: #8b4513; }
+  .char-count.ok   { color: #1a5c25; font-weight: 700; }
+
+  .row2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 14px;
+    background: #1e5c28;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Tajawal', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.25s, transform 0.15s;
+    letter-spacing: 0.5px;
+  }
+
+  .submit-btn:hover { background: #154a1f; transform: translateY(-1px); }
+  .submit-btn:active { transform: translateY(0); }
+  .submit-btn:disabled { background: #6a9e72; cursor: not-allowed; transform: none; }
+
+  .msg {
+    display: none;
+    text-align: center;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    margin-top: 16px;
+  }
+
+  .msg.success { background: rgba(26,92,37,0.2); color: #0d3312; border: 2px solid #1e5c28; }
+  .msg.error   { background: rgba(139,0,0,0.12); color: #5a0000; border: 2px solid #8b0000; }
+
+  select option { color: #1a3d1f; background: #fff; }
+
+  @media(max-width:480px){
+    .card { padding: 24px 16px; }
+    .row2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo-area">
+    <h1>🌿 استبيان العناية</h1>
+    <p>يرجى تعبئة جميع الحقول بدقة</p>
+  </div>
+  <div class="divider"></div>
+
+  <form id="surveyForm">
+
+    <!-- 1. الاسم الثلاثي -->
+    <div class="form-group">
+      <label>١. الاسم الثلاثي <span class="req">*</span></label>
+      <input type="text" id="fullName" placeholder="الاسم الأول، الأب، العائلة" required>
+    </div>
+
+    <!-- 2. رقم الهاتف -->
+    <div class="form-group">
+      <label>٢. رقم الهاتف <span class="req">*</span></label>
+      <input type="tel" id="phone" placeholder="07XXXXXXXXX" required>
+    </div>
+
+    <!-- 3. المحافظة -->
+    <div class="form-group">
+      <label>٣. المحافظة <span class="req">*</span></label>
+      <select id="governorate" required>
+        <option value="">— اختر المحافظة —</option>
+        <option>بغداد</option><option>البصرة</option><option>نينوى</option>
+        <option>أربيل</option><option>النجف</option><option>كربلاء</option>
+        <option>الأنبار</option><option>ديالى</option><option>صلاح الدين</option>
+        <option>كركوك</option><option>واسط</option><option>ميسان</option>
+        <option>ذي قار</option><option>المثنى</option><option>القادسية</option>
+        <option>بابل</option><option>دهوك</option><option>السليمانية</option>
+      </select>
+    </div>
+
+    <!-- 4. المنطقة -->
+    <div class="form-group">
+      <label>٤. المنطقة ونقطة دالة <span class="req">*</span></label>
+      <input type="text" id="area" placeholder="مثال: الكرادة، قرب مول بغداد" required>
+    </div>
+
+    <!-- 5 & 6. روابط السوشيال ميديا -->
+    <div class="row2">
+      <div class="form-group">
+        <label>٥. رابط الانستغرام <span class="req">*</span></label>
+        <input type="url" id="instagram" placeholder="https://instagram.com/..." required>
+      </div>
+      <div class="form-group">
+        <label>٦. رابط التيك توك <span class="req">*</span></label>
+        <input type="url" id="tiktok" placeholder="https://tiktok.com/..." required>
+      </div>
+    </div>
+
+    <!-- 7. تاريخ الميلاد -->
+    <div class="form-group">
+      <label>٧. تاريخ الميلاد <span class="req">*</span></label>
+      <input type="date" id="birthdate" required>
+    </div>
+
+    <!-- 8. نوع البشرة -->
+    <div class="form-group">
+      <label>٨. نوع البشرة <span class="req">*</span></label>
+      <select id="skinType" required>
+        <option value="">— اختر نوع البشرة —</option>
+        <option>بشرة عادية</option>
+        <option>بشرة جافة</option>
+        <option>بشرة دهنية</option>
+        <option>بشرة مختلطة</option>
+        <option>بشرة حساسة</option>
+      </select>
+    </div>
+
+    <!-- 9. نوع الشعر -->
+    <div class="form-group">
+      <label>٩. نوع الشعر <span class="req">*</span></label>
+      <select id="hairType" required>
+        <option value="">— اختر نوع الشعر —</option>
+        <option>شعر مستقيم</option>
+        <option>شعر مموج</option>
+        <option>شعر مجعد</option>
+        <option>شعر كيرلي</option>
+        <option>شعر خشن</option>
+        <option>شعر ناعم</option>
+        <option>شعر دهني</option>
+        <option>شعر جاف</option>
+      </select>
+    </div>
+
+    <!-- 10. الخبرة -->
+    <div class="form-group">
+      <label>١٠. خبرتك في مجال العناية <span class="req">*</span> <small style="font-weight:400;color:#2d5a32;">(لا تقل عن 200 حرف)</small></label>
+      <textarea id="experience" placeholder="اكتب عن خبرتك في مجال العناية بالبشرة والشعر..." oninput="countChars(this)"></textarea>
+      <div class="char-count" id="charCount">0 / 200 حرف</div>
+    </div>
+
+    <button type="submit" class="submit-btn" id="submitBtn">📩 إرسال الاستبيان</button>
+  </form>
+
+  <div class="msg" id="successMsg">✅ تم إرسال استبيانك بنجاح! شكراً لك 🌿</div>
+  <div class="msg" id="errorMsg">❌ حدث خطأ أثناء الإرسال، يرجى المحاولة مجدداً.</div>
+</div>
+
+<script>
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDRyv2J7S5QgmUiIxl8MSS_reno3t3xJ912YKeMToOrRVJWm91JD6-BKk2hOC_zVV0/exec";
+
+  function countChars(el) {
+    const len = el.value.length;
+    const cc = document.getElementById('charCount');
+    cc.textContent = len + ' / 200 حرف';
+    cc.className = 'char-count' + (len >= 200 ? ' ok' : len > 150 ? ' warn' : '');
+  }
+
+  document.getElementById('surveyForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const exp = document.getElementById('experience').value.trim();
+    if (exp.length < 200) {
+      document.getElementById('experience').focus();
+      alert('⚠️ يرجى كتابة خبرتك بما لا يقل عن 200 حرف. الحروف الحالية: ' + exp.length);
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ جاري الإرسال...';
+
+    const payload = {
+      fullName:    document.getElementById('fullName').value.trim(),
+      phone:       document.getElementById('phone').value.trim(),
+      governorate: document.getElementById('governorate').value,
+      area:        document.getElementById('area').value.trim(),
+      instagram:   document.getElementById('instagram').value.trim(),
+      tiktok:      document.getElementById('tiktok').value.trim(),
+      birthdate:   document.getElementById('birthdate').value,
+      skinType:    document.getElementById('skinType').value,
+      hairType:    document.getElementById('hairType').value,
+      experience:  exp
+    };
+
+    try {
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      document.getElementById('surveyForm').style.display = 'none';
+      document.getElementById('successMsg').style.display = 'block';
+    } catch (err) {
+      document.getElementById('errorMsg').style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = '📩 إرسال الاستبيان';
+    }
+  });
+</script>
+</body>
+</html>
