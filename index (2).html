@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>استبيان وندر</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- احتياطي فقط إذا ملفات Myriad Arabic غير موجودة -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  /* ===== الخطوط =====
+     ضعي ملفات الخطوط داخل مجلد fonts بجانب هذا الملف:
+     fonts/Lunema-Regular.woff2  (أو .otf / .ttf)
+     fonts/MyriadArabic-Regular.woff2  (أو .otf / .ttf)            */
+  @font-face {
+    font-family: 'Lunema';
+    src: local('Lunema Regular'), local('Lunema-Regular'), local('Lunema'),
+         url('fonts/Lunema-Regular.woff2') format('woff2'),
+         url('fonts/Lunema-Regular.otf') format('opentype'),
+         url('fonts/Lunema-Regular.ttf') format('truetype');
+    font-weight: 400; font-display: swap;
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+20AC, U+2122;
+  }
+  @font-face {
+    font-family: 'Myriad Arabic';
+    src: local('Myriad Arabic'), local('MyriadArabic-Regular'),
+         url('fonts/MyriadArabic-Regular.woff2') format('woff2'),
+         url('fonts/MyriadArabic-Regular.otf') format('opentype'),
+         url('fonts/MyriadArabic-Regular.ttf') format('truetype');
+    font-weight: 400; font-display: swap;
+    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+  }
+
+  :root {
+    --bg: #eae9e4;
+    --green: #c5ce8c;
+    --red: #d24728;
+    --ink: #2a2925;
+    --muted: #6d6b63;
+    --field: #f6f5f1;
+    --font: 'Lunema', 'Myriad Arabic', 'Noto Sans Arabic', system-ui, sans-serif;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *, *::before, *::after { box-sizing: inherit; margin: 0; padding: 0; }
+
+  html { background: var(--bg); }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    line-height: 1.7;
+    padding: 34px 16px 48px;
+  }
+
+  /* الإطار الرفيع على كل أطراف الصفحة بلونين */
+  .frame {
+    position: fixed; pointer-events: none; z-index: 10;
+    inset: calc(8px + env(safe-area-inset-top, 0px)) 8px calc(8px + env(safe-area-inset-bottom, 0px)) 8px;
+    border: 1.5px solid var(--red);
+  }
+  .frame::after {
+    content: ""; position: absolute; inset: 4px;
+    border: 1.5px solid var(--green);
+  }
+
+  .wrap { max-width: 620px; margin: 0 auto; }
+
+  header { text-align: center; padding: 26px 0 30px; }
+  header h1 {
+    font-size: clamp(30px, 7vw, 40px);
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.3;
+  }
+  header .bar {
+    width: 64px; height: 3px; margin: 16px auto 14px;
+    background: linear-gradient(to left, var(--red) 50%, var(--green) 50%);
+  }
+  header p { color: var(--muted); font-size: 15px; }
+
+  section {
+    border: 1px solid var(--green);
+    outline: 1px solid var(--red);
+    outline-offset: 3px;
+    padding: 26px 22px 8px;
+    margin-bottom: 28px;
+    background: rgba(255,255,255,.35);
+  }
+  section h2 {
+    font-size: 17px; font-weight: 600; color: var(--red);
+    margin-bottom: 20px;
+  }
+
+  .q { margin-bottom: 22px; }
+  .q label.title { display: block; font-size: 15px; margin-bottom: 8px; }
+  .q label.title .n { color: var(--red); margin-left: 4px; }
+
+  input[type=text], input[type=tel], input[type=date], textarea {
+    width: 100%;
+    font: inherit; font-size: 15px; color: var(--ink);
+    background: var(--field);
+    border: 1px solid #cfcdc4;
+    padding: 11px 13px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  textarea { min-height: 96px; resize: vertical; }
+  input:focus, textarea:focus {
+    border-color: var(--red);
+    box-shadow: 0 0 0 3px rgba(197,206,140,.55);
+  }
+  .ltr { direction: ltr; text-align: left; }
+  .hint { font-size: 13px; color: var(--muted); margin-top: 5px; }
+  .field-err { font-size: 13px; color: var(--red); margin-top: 5px; display: none; }
+  .q.invalid .field-err { display: block; }
+  .q.invalid input, .q.invalid textarea { border-color: var(--red); }
+
+  .choices { display: grid; gap: 8px; }
+  .choices.two { grid-template-columns: 1fr 1fr; }
+  .choice {
+    display: flex; align-items: center; gap: 10px;
+    border: 1px solid #cfcdc4; background: var(--field);
+    padding: 10px 13px; cursor: pointer; font-size: 15px;
+  }
+  .choice input { accent-color: var(--red); width: 17px; height: 17px; }
+  .choice:has(input:checked) { border-color: var(--red); background: #fff; }
+  .choice:has(input:focus-visible) { box-shadow: 0 0 0 3px rgba(197,206,140,.7); }
+
+  button[type=submit] {
+    width: 100%;
+    font: inherit; font-size: 17px;
+    background: var(--red); color: #fff;
+    border: none; padding: 14px;
+    cursor: pointer;
+    outline: 1px solid var(--green); outline-offset: 3px;
+  }
+  button[type=submit]:hover { background: #b93c20; }
+  button[type=submit]:focus-visible { outline: 3px solid var(--green); }
+  button[type=submit]:disabled { opacity: .6; cursor: wait; }
+
+  .note { text-align: center; color: var(--muted); font-size: 14px; margin: 18px 0 0; }
+
+  .msg { display: none; margin-top: 18px; padding: 14px 16px; font-size: 15px; text-align: center; }
+  .msg.show { display: block; }
+  .msg.err { border: 1px solid var(--red); color: var(--red); background: rgba(210,71,40,.06); }
+
+  .done { display: none; text-align: center; padding: 60px 20px; }
+  .done.show { display: block; }
+  .done h2 { font-size: 26px; font-weight: 400; margin-bottom: 10px; }
+  .done p { color: var(--muted); }
+
+  @media (max-width: 480px) {
+    body { padding: 26px 14px 40px; }
+    section { padding: 22px 16px 4px; }
+    .choices.two { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="frame" aria-hidden="true"></div>
+
+<div class="wrap">
+  <header>
+    <h1>استبيان وندر</h1>
+    <div class="bar"></div>
+    <p>كل الحقول مطلوبة، والتسجيل مرة وحدة فقط لكل رقم هاتف</p>
+  </header>
+
+  <form id="f" novalidate>
+    <section>
+      <h2>معلوماتج</h2>
+
+      <div class="q">
+        <label class="title" for="fullName"><span class="n">1.</span>الاسم الثلاثي</label>
+        <input type="text" id="fullName" name="fullName" autocomplete="name" required>
+        <div class="field-err">اكتبي الاسم الثلاثي</div>
+      </div>
+
+      <div class="q">
+        <label class="title" for="phone"><span class="n">2.</span>رقم الهاتف</label>
+        <input type="tel" id="phone" name="phone" class="ltr" inputmode="tel" placeholder="07XXXXXXXXX" autocomplete="tel" required>
+        <div class="hint">رقم عراقي من 11 رقم يبدأ بـ 07</div>
+        <div class="field-err" id="phoneErr">اكتبي رقم هاتف صحيح يبدأ بـ 07 ويتكون من 11 رقم</div>
+      </div>
+
+      <div class="q">
+        <label class="title" for="birthdate"><span class="n">3.</span>تاريخ الميلاد</label>
+        <input type="date" id="birthdate" name="birthdate" required>
+        <div class="field-err">اختاري تاريخ الميلاد</div>
+      </div>
+
+      <div class="q">
+        <label class="title" for="major"><span class="n">4.</span>التخصص الدراسي</label>
+        <input type="text" id="major" name="major" required>
+        <div class="field-err">اكتبي التخصص الدراسي</div>
+      </div>
+
+      <div class="q">
+        <label class="title" for="instagram"><span class="n">5.</span>رابط حساب الانستكرام</label>
+        <input type="text" id="instagram" name="instagram" class="ltr" placeholder="https://instagram.com/..." required>
+        <div class="field-err">اكتبي رابط حساب الانستكرام</div>
+      </div>
+
+      <div class="q">
+        <label class="title" for="tiktok"><span class="n">6.</span>رابط حساب التيك توك</label>
+        <input type="text" id="tiktok" name="tiktok" class="ltr" placeholder="https://tiktok.com/@..." required>
+        <div class="field-err">اكتبي رابط حساب التيك توك</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>المحتوى والالتزام</h2>
+
+      <div class="q">
+        <label class="title" for="whyInfluencer"><span class="n">7.</span>شنو الشي الي يخليج تصيرين مؤثرة؟</label>
+        <textarea id="whyInfluencer" name="whyInfluencer" required></textarea>
+        <div class="field-err">هذا السؤال مطلوب</div>
+      </div>
+
+      <div class="q">
+        <label class="title" for="contentType"><span class="n">8.</span>شنو اكثر نوع محتوى تحبين تقديمه للجمهور؟ او اكثر نوع انتي متميزة بيه بحسابج</label>
+        <textarea id="contentType" name="contentType" required></textarea>
+        <div class="field-err">هذا السؤال مطلوب</div>
+      </div>
+
+      <div class="q" data-group="weeklyTime">
+        <label class="title"><span class="n">9.</span>شكد من وقتج تكدرين تخصصين اسبوعيا للنشر وصناعة المحتوى والتعاون مع وندر؟</label>
+        <div class="choices two" role="radiogroup">
+          <label class="choice"><input type="radio" name="weeklyTime" value="أقل من 3 ساعات">أقل من 3 ساعات</label>
+          <label class="choice"><input type="radio" name="weeklyTime" value="3 إلى 6 ساعات">3 إلى 6 ساعات</label>
+          <label class="choice"><input type="radio" name="weeklyTime" value="6 إلى 10 ساعات">6 إلى 10 ساعات</label>
+          <label class="choice"><input type="radio" name="weeklyTime" value="أكثر من 10 ساعات">أكثر من 10 ساعات</label>
+        </div>
+        <div class="field-err">اختاري وحدة من الخيارات</div>
+      </div>
+
+      <div class="q" data-group="commitMeetings">
+        <label class="title"><span class="n">10.</span>هل تكدرين تلتزمين بأجتماع شهري ومتابعة اسبوعية مع فريق وندر؟</label>
+        <div class="choices two" role="radiogroup">
+          <label class="choice"><input type="radio" name="commitMeetings" value="نعم">نعم</label>
+          <label class="choice"><input type="radio" name="commitMeetings" value="لا">لا</label>
+        </div>
+        <div class="field-err">اختاري نعم أو لا</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>المواقف والأهداف</h2>
+
+      <div class="q">
+        <label class="title" for="missedDeadline"><span class="n">11.</span>اذا صار عندج ظرف وماكدرتي تنشرين بالموعد المتفق عليه، شنو راح تسوين؟</label>
+        <textarea id="missedDeadline" name="missedDeadline" required></textarea>
+        <div class="field-err">هذا السؤال مطلوب</div>
+      </div>
+
+      <div class="q">
+        <label class="title" for="lowResults"><span class="n">12.</span>اذا نزلتي محتوى وماجاب النتيجة المتوقعة، شنو تسوين؟</label>
+        <textarea id="lowResults" name="lowResults" required></textarea>
+        <div class="field-err">هذا السؤال مطلوب</div>
+      </div>
+
+      <div class="q">
+        <label class="title" for="feedback"><span class="n">13.</span>اذا وصلتج ملاحظة او طلب تعديل على المحتوى، شلون راح تتعاملين مع هالملاحظة؟</label>
+        <textarea id="feedback" name="feedback" required></textarea>
+        <div class="field-err">هذا السؤال مطلوب</div>
+      </div>
+
+      <div class="q">
+        <label class="title" for="unsuitableProduct"><span class="n">14.</span>اذا جربتي منتج وماناسبج، شنو تتصرفين؟</label>
+        <textarea id="unsuitableProduct" name="unsuitableProduct" required></textarea>
+        <div class="field-err">هذا السؤال مطلوب</div>
+      </div>
+
+      <div class="q">
+        <label class="title" for="hardestPart"><span class="n">15.</span>شنو اكثر شي تتوقعيه يكون صعب عليج بهالتعاون؟</label>
+        <textarea id="hardestPart" name="hardestPart" required></textarea>
+        <div class="field-err">هذا السؤال مطلوب</div>
+      </div>
+
+      <div class="q">
+        <label class="title" for="goal3Months"><span class="n">16.</span>شنو هدفج من التعاون مع وندر خلال اول 3 اشهر؟</label>
+        <textarea id="goal3Months" name="goal3Months" required></textarea>
+        <div class="field-err">هذا السؤال مطلوب</div>
+      </div>
+
+      <div class="q">
+        <label class="title" for="whyWonder"><span class="n">17.</span>ليش اختاريتي وندر؟</label>
+        <textarea id="whyWonder" name="whyWonder" required></textarea>
+        <div class="field-err">هذا السؤال مطلوب</div>
+      </div>
+    </section>
+
+    <button type="submit" id="btn">إرسال الاستبيان</button>
+    <div class="msg err" id="msg" role="alert"></div>
+    <p class="note">راح نراجع معلوماتج ونتواصل وياج بأقرب وقت</p>
+  </form>
+
+  <div class="done" id="done">
+    <h2>وصلنا استبيانج</h2>
+    <p>شكراً إلج، فريق وندر راح يتواصل وياج بأقرب وقت</p>
+  </div>
+</div>
+
+<script>
+  // رابط Google Apps Script (نفس الرابط القديم بعد تحديث الكود ونشر نسخة جديدة)
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDRyv2J7S5QgmUiIxl8MSS_reno3t3xJ912YKeMToOrRVJWm91JD6-BKk2hOC_zVV0/exec";
+
+  const TEXT_FIELDS = ["fullName","phone","birthdate","major","instagram","tiktok",
+    "whyInfluencer","contentType","missedDeadline","lowResults","feedback",
+    "unsuitableProduct","hardestPart","goal3Months","whyWonder"];
+  const RADIO_FIELDS = ["weeklyTime","commitMeetings"];
+
+  const form = document.getElementById("f");
+  const btn = document.getElementById("btn");
+  const msg = document.getElementById("msg");
+  const phoneInput = document.getElementById("phone");
+  const phoneErr = document.getElementById("phoneErr");
+  const PHONE_FORMAT_MSG = phoneErr.textContent;
+
+  // توحيد رقم الهاتف: يحول الأرقام العربية، يشيل الفراغات، ويحول 964+ إلى 07
+  function normPhone(v) {
+    v = String(v || "")
+      .replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d))
+      .replace(/[۰-۹]/g, d => "۰۱۲۳۴۵۶۷۸۹".indexOf(d))
+      .replace(/\D/g, "");
+    if (v.startsWith("00964")) v = v.slice(5);
+    else if (v.startsWith("964")) v = v.slice(3);
+    if (v.startsWith("0")) v = v.slice(1);
+    return (v.length === 10 && v.startsWith("7")) ? "0" + v : null;
+  }
+
+  function setInvalid(el, bad) { el.closest(".q").classList.toggle("invalid", bad); }
+
+  function validate() {
+    let first = null;
+    TEXT_FIELDS.forEach(id => {
+      const el = document.getElementById(id);
+      let bad = !el.value.trim();
+      if (id === "phone" && !bad) bad = !normPhone(el.value);
+      if (id === "phone") phoneErr.textContent = PHONE_FORMAT_MSG;
+      setInvalid(el, bad);
+      if (bad && !first) first = el;
+    });
+    RADIO_FIELDS.forEach(name => {
+      const box = document.querySelector(`[data-group="${name}"]`);
+      const bad = !form.querySelector(`input[name="${name}"]:checked`);
+      box.classList.toggle("invalid", bad);
+      if (bad && !first) first = box.querySelector("input");
+    });
+    if (first) first.focus({ preventScroll: false });
+    return !first;
+  }
+
+  // يشيل علامة الخطأ أول ما تبدأ تكتب
+  form.addEventListener("input", e => {
+    const q = e.target.closest(".q");
+    if (q) q.classList.remove("invalid");
+    msg.classList.remove("show");
+  });
+
+  // فحص مبكر: إذا الرقم مسجل من قبل ينبهها قبل ما تكمل الأسئلة
+  phoneInput.addEventListener("blur", async () => {
+    const p = normPhone(phoneInput.value);
+    if (!p) return;
+    try {
+      const r = await fetch(SCRIPT_URL + "?action=check&phone=" + encodeURIComponent(p));
+      const d = await r.json();
+      if (d.exists) {
+        phoneErr.textContent = "هذا الرقم مسجّل مسبقاً، ما يمكن التسجيل أكثر من مرة";
+        setInvalid(phoneInput, true);
+      }
+    } catch (_) { /* الفحص النهائي يصير عند الإرسال */ }
+  });
+
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    msg.classList.remove("show");
+    if (!validate()) return;
+
+    const data = {};
+    TEXT_FIELDS.forEach(id => data[id] = document.getElementById(id).value.trim());
+    RADIO_FIELDS.forEach(n => data[n] = form.querySelector(`input[name="${n}"]:checked`).value);
+    data.phone = normPhone(data.phone);
+
+    btn.disabled = true;
+    btn.textContent = "جاري الإرسال...";
+    try {
+      const r = await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(data)
+      });
+      const res = await r.json();
+      if (res.status === "success") {
+        form.style.display = "none";
+        document.getElementById("done").classList.add("show");
+        window.scrollTo({ top: 0 });
+        return;
+      }
+      if (res.status === "duplicate") {
+        phoneErr.textContent = "هذا الرقم مسجّل مسبقاً، ما يمكن التسجيل أكثر من مرة";
+        setInvalid(phoneInput, true);
+        phoneInput.focus();
+        showMsg("هذا الرقم مسجّل مسبقاً، ما يمكن التسجيل أكثر من مرة");
+      } else if (res.status === "invalid") {
+        showMsg(res.message || "في حقل ناقص أو غير صحيح، راجعي الأجوبة");
+      } else {
+        showMsg("ما وصل الاستبيان. تأكدي من الانترنت وحاولي مرة ثانية");
+      }
+    } catch (_) {
+      showMsg("ما وصل الاستبيان. تأكدي من الانترنت وحاولي مرة ثانية");
+    }
+    btn.disabled = false;
+    btn.textContent = "إرسال الاستبيان";
+  });
+
+  function showMsg(t) { msg.textContent = t; msg.classList.add("show"); }
+</script>
+</body>
+</html>
